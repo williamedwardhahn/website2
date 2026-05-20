@@ -1,0 +1,679 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+<meta name="description" content="Crane — a flappy variant. A red-crowned crane flapping past bamboo pipes, set in the Japanese Woodblock palette." />
+<title>鶴 · Crane — A Flappy Variant</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@500;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #2b2821;
+    --brown: #624c3c;
+    --tan: #d9ac8b;
+    --paper: #e3cfb4;
+    --paper-warm: #ece0c8;
+    --navy: #243d5c;
+    --slate: #5d7275;
+    --teal: #5c8b93;
+    --stone: #b1a58d;
+    --vermilion: #b03a48;
+    --persimmon: #d4804d;
+    --gold: #e0c872;
+    --moss: #3e6958;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body {
+    height: 100%;
+    background: var(--paper);
+    overflow: hidden;
+    font-family: 'Shippori Mincho', serif;
+    color: var(--ink);
+    -webkit-tap-highlight-color: transparent;
+    user-select: none;
+    -webkit-user-select: none;
+  }
+  .stage {
+    position: relative;
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
+  }
+  canvas {
+    display: block;
+    width: 100%;
+    height: 100%;
+    background: var(--paper);
+    touch-action: none;
+  }
+
+  /* HUD */
+  .hud {
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    padding: 22px 28px;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    pointer-events: none;
+    z-index: 5;
+  }
+  .hud .l, .hud .r {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+    color: var(--brown);
+    line-height: 1.5;
+  }
+  .hud .l .kanji, .hud .r .kanji {
+    font-family: 'Shippori Mincho', serif;
+    font-size: 22px;
+    color: var(--vermilion);
+    letter-spacing: 0;
+    margin-right: 8px;
+    vertical-align: -2px;
+  }
+  .hud .r { text-align: right; }
+
+  .score {
+    position: absolute;
+    top: 60px; left: 50%;
+    transform: translateX(-50%);
+    font-family: 'Shippori Mincho', serif;
+    font-weight: 700;
+    font-size: clamp(64px, 12vw, 112px);
+    color: var(--ink);
+    line-height: 1;
+    text-shadow: 0 3px 0 var(--paper-warm), 0 6px 0 rgba(43,40,33,0.08);
+    pointer-events: none;
+    z-index: 5;
+    opacity: 0;
+    transition: opacity .3s ease;
+  }
+  .score.show { opacity: 1; }
+
+  /* Overlay screens */
+  .overlay {
+    position: absolute; inset: 0;
+    background: rgba(36, 61, 92, 0.88);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10;
+    color: var(--paper-warm);
+    transition: opacity .35s ease;
+    backdrop-filter: blur(2px);
+  }
+  .overlay.hidden { opacity: 0; pointer-events: none; }
+
+  .panel {
+    text-align: center;
+    padding: 40px;
+    max-width: 460px;
+  }
+  .panel .seal {
+    width: 78px; height: 78px;
+    margin: 0 auto 18px;
+    background: var(--vermilion);
+    color: #fff;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Shippori Mincho', serif;
+    font-weight: 700;
+    font-size: 44px;
+    transform: rotate(-4deg);
+    line-height: 1;
+    box-shadow: 0 3px 0 rgba(20,8,8,0.25);
+  }
+  .panel h1 {
+    font-family: 'Shippori Mincho', serif;
+    font-weight: 700;
+    font-size: clamp(40px, 7vw, 64px);
+    line-height: 1.05;
+    margin-bottom: 8px;
+    color: #fff;
+    letter-spacing: -0.01em;
+  }
+  .panel .sub {
+    font-family: 'Shippori Mincho', serif;
+    font-style: italic;
+    font-size: 18px;
+    color: var(--gold);
+    margin-bottom: 30px;
+    letter-spacing: 0.02em;
+  }
+  .panel .instr {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.22em;
+    color: var(--tan);
+    margin-bottom: 28px;
+    line-height: 1.7;
+  }
+  .panel .instr .key {
+    border: 1px solid var(--tan);
+    padding: 3px 8px;
+    margin: 0 3px;
+  }
+  .panel .score-final {
+    font-family: 'Shippori Mincho', serif;
+    font-weight: 700;
+    font-size: 72px;
+    color: var(--gold);
+    line-height: 1;
+    margin-bottom: 6px;
+  }
+  .panel .best {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+    color: var(--tan);
+    margin-bottom: 28px;
+  }
+  .panel .btn {
+    display: inline-block;
+    padding: 14px 36px;
+    background: var(--vermilion);
+    color: #fff;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.24em;
+    font-weight: 500;
+    border: none;
+    cursor: pointer;
+    transition: transform .15s ease, background .15s ease;
+  }
+  .panel .btn:hover { transform: translateY(-2px); background: #c44559; }
+  .panel .btn:active { transform: translateY(0); }
+  .panel .back {
+    display: block;
+    margin-top: 20px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.22em;
+    color: var(--tan);
+    text-decoration: none;
+    opacity: 0.7;
+  }
+  .panel .back:hover { opacity: 1; color: var(--gold); }
+</style>
+</head>
+<body>
+
+<div class="stage">
+  <canvas id="game"></canvas>
+
+  <div class="hud">
+    <div class="l"><span class="kanji">鶴</span>Crane<br>A Flappy Variant</div>
+    <div class="r">Tap · Click · Space</div>
+  </div>
+
+  <div class="score" id="score">0</div>
+
+  <div class="overlay" id="start">
+    <div class="panel">
+      <div class="seal">鶴</div>
+      <h1>Crane</h1>
+      <div class="sub">— A Flappy Variant —</div>
+      <div class="instr">
+        <span class="key">Space</span> <span class="key">Click</span> <span class="key">Tap</span><br>
+        to flap
+      </div>
+      <button class="btn" id="begin">Begin</button>
+      <a class="back" href="index.html">← back to compendium</a>
+    </div>
+  </div>
+
+  <div class="overlay hidden" id="over">
+    <div class="panel">
+      <div class="seal">終</div>
+      <h1>End of Flight</h1>
+      <div class="sub">— Score —</div>
+      <div class="score-final" id="finalScore">0</div>
+      <div class="best" id="best">Best 0</div>
+      <button class="btn" id="again">Again</button>
+      <a class="back" href="index.html">← back to compendium</a>
+    </div>
+  </div>
+</div>
+
+<script>
+(() => {
+  const canvas = document.getElementById('game');
+  const ctx = canvas.getContext('2d');
+  const scoreEl = document.getElementById('score');
+  const overlayStart = document.getElementById('start');
+  const overlayOver = document.getElementById('over');
+  const finalScoreEl = document.getElementById('finalScore');
+  const bestEl = document.getElementById('best');
+  const beginBtn = document.getElementById('begin');
+  const againBtn = document.getElementById('again');
+
+  // High-DPI canvas sizing
+  let W = 0, H = 0, DPR = 1;
+  function resize() {
+    DPR = Math.min(window.devicePixelRatio || 1, 2);
+    W = window.innerWidth;
+    H = window.innerHeight;
+    canvas.width = W * DPR;
+    canvas.height = H * DPR;
+    canvas.style.width = W + 'px';
+    canvas.style.height = H + 'px';
+    ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+  }
+  window.addEventListener('resize', resize);
+  resize();
+
+  const C = {
+    ink: '#2b2821', brown: '#624c3c', tan: '#d9ac8b',
+    paper: '#e3cfb4', paperWarm: '#ece0c8',
+    navy: '#243d5c', slate: '#5d7275', teal: '#5c8b93',
+    stone: '#b1a58d', vermilion: '#b03a48',
+    persimmon: '#d4804d', gold: '#e0c872', moss: '#3e6958',
+    white: '#f5efe2', mossDark: '#2c4d3f',
+  };
+
+  const STATE = { IDLE: 0, PLAYING: 1, OVER: 2 };
+  let state = STATE.IDLE;
+
+  const bird = { x: 0, y: 0, vy: 0, r: 18, rot: 0, wing: 0 };
+  const GRAVITY = 1500;
+  const FLAP_V = -460;
+  const MAX_FALL = 720;
+
+  let pipes = [];
+  const PIPE_W = 72;
+  const PIPE_SPACING = 290;
+  let pipeTimer = 0;
+  const SCROLL = 210;
+
+  const GROUND_H = 80;
+
+  let score = 0;
+  let best = parseInt(localStorage.getItem('crane_best') || '0', 10);
+  bestEl.textContent = 'Best ' + best;
+
+  function reset() {
+    bird.x = W * 0.28;
+    bird.y = H * 0.42;
+    bird.vy = 0;
+    bird.rot = 0;
+    bird.wing = 0;
+    pipes = [];
+    pipeTimer = PIPE_SPACING * 0.4;
+    score = 0;
+    scoreEl.textContent = '0';
+  }
+
+  function spawnPipe() {
+    const gapH = Math.max(150, H * 0.22) + Math.random() * 50;
+    const margin = 70;
+    const usable = Math.max(60, H - GROUND_H - margin * 2 - gapH);
+    const gapY = margin + Math.random() * usable;
+    pipes.push({ x: W + PIPE_W, gapY, gapH, passed: false });
+  }
+
+  function startGame() {
+    reset();
+    state = STATE.PLAYING;
+    overlayStart.classList.add('hidden');
+    overlayOver.classList.add('hidden');
+    scoreEl.classList.add('show');
+    bird.vy = FLAP_V;
+  }
+
+  function gameOver() {
+    state = STATE.OVER;
+    scoreEl.classList.remove('show');
+    if (score > best) {
+      best = score;
+      localStorage.setItem('crane_best', String(best));
+    }
+    finalScoreEl.textContent = score;
+    bestEl.textContent = 'Best ' + best;
+    setTimeout(() => overlayOver.classList.remove('hidden'), 650);
+  }
+
+  function flap() {
+    if (state === STATE.PLAYING) {
+      bird.vy = FLAP_V;
+      bird.wing = 0;
+    }
+  }
+
+  // Input
+  window.addEventListener('keydown', e => {
+    if (e.code === 'Space' || e.code === 'ArrowUp') {
+      e.preventDefault();
+      if (state === STATE.IDLE || state === STATE.OVER) startGame();
+      else if (state === STATE.PLAYING) flap();
+    }
+  });
+  canvas.addEventListener('pointerdown', e => {
+    e.preventDefault();
+    if (state === STATE.PLAYING) flap();
+  });
+  beginBtn.addEventListener('click', e => { e.stopPropagation(); startGame(); });
+  againBtn.addEventListener('click', e => { e.stopPropagation(); startGame(); });
+
+  // ── Drawing ──────────────────────────────────────────
+  function drawBackground() {
+    // sky gradient — warm dawn
+    const g = ctx.createLinearGradient(0, 0, 0, H - GROUND_H);
+    g.addColorStop(0, '#ecd9b0');
+    g.addColorStop(0.7, C.paper);
+    g.addColorStop(1, C.paperWarm);
+    ctx.fillStyle = g;
+    ctx.fillRect(0, 0, W, H - GROUND_H);
+
+    // rising sun — vermilion disc
+    const sunR = Math.min(64, W * 0.07);
+    const sunX = W * 0.78, sunY = H * 0.22;
+    ctx.fillStyle = C.vermilion;
+    ctx.globalAlpha = 0.9;
+    ctx.beginPath();
+    ctx.arc(sunX, sunY, sunR, 0, Math.PI * 2);
+    ctx.fill();
+    // halo
+    ctx.globalAlpha = 0.18;
+    ctx.beginPath();
+    ctx.arc(sunX, sunY, sunR * 1.4, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.globalAlpha = 1;
+
+    // distant hills — slate
+    ctx.fillStyle = C.slate;
+    ctx.globalAlpha = 0.6;
+    ctx.beginPath();
+    const dY = H - GROUND_H - 55;
+    ctx.moveTo(0, dY);
+    ctx.bezierCurveTo(W*0.15, dY-28, W*0.3, dY-8, W*0.5, dY-22);
+    ctx.bezierCurveTo(W*0.7, dY-36, W*0.85, dY-18, W, dY-12);
+    ctx.lineTo(W, H - GROUND_H);
+    ctx.lineTo(0, H - GROUND_H);
+    ctx.closePath();
+    ctx.fill();
+    ctx.globalAlpha = 1;
+
+    // mid hills — teal
+    ctx.fillStyle = C.teal;
+    ctx.globalAlpha = 0.6;
+    ctx.beginPath();
+    const mY = H - GROUND_H - 26;
+    ctx.moveTo(0, mY);
+    ctx.bezierCurveTo(W*0.2, mY-18, W*0.4, mY-4, W*0.6, mY-14);
+    ctx.bezierCurveTo(W*0.78, mY-22, W*0.9, mY-8, W, mY-2);
+    ctx.lineTo(W, H - GROUND_H);
+    ctx.lineTo(0, H - GROUND_H);
+    ctx.closePath();
+    ctx.fill();
+    ctx.globalAlpha = 1;
+
+    // Fuji silhouette — navy
+    const fX = W * 0.42, fBaseY = H - GROUND_H;
+    const fW = Math.min(W * 0.42, 420);
+    const fTopY = Math.max(80, H * 0.22);
+    ctx.fillStyle = C.navy;
+    ctx.beginPath();
+    ctx.moveTo(fX - fW / 2, fBaseY);
+    ctx.lineTo(fX - 34, fTopY + 38);
+    ctx.lineTo(fX, fTopY);
+    ctx.lineTo(fX + 34, fTopY + 38);
+    ctx.lineTo(fX + fW / 2, fBaseY);
+    ctx.closePath();
+    ctx.fill();
+    // snow cap
+    ctx.fillStyle = C.paper;
+    ctx.beginPath();
+    ctx.moveTo(fX - 24, fTopY + 32);
+    ctx.lineTo(fX - 8, fTopY + 8);
+    ctx.lineTo(fX, fTopY);
+    ctx.lineTo(fX + 8, fTopY + 8);
+    ctx.lineTo(fX + 24, fTopY + 32);
+    ctx.lineTo(fX + 14, fTopY + 36);
+    ctx.lineTo(fX, fTopY + 30);
+    ctx.lineTo(fX - 14, fTopY + 36);
+    ctx.closePath();
+    ctx.fill();
+  }
+
+  function drawGround() {
+    ctx.fillStyle = C.brown;
+    ctx.fillRect(0, H - GROUND_H, W, GROUND_H);
+    // moss top strip
+    ctx.fillStyle = C.moss;
+    ctx.fillRect(0, H - GROUND_H, W, 10);
+    // texture lines
+    ctx.strokeStyle = 'rgba(43,40,33,0.20)';
+    ctx.lineWidth = 1;
+    for (let i = 0; i < 6; i++) {
+      const y = H - GROUND_H + 16 + i * 10;
+      ctx.beginPath();
+      ctx.moveTo(0, y);
+      ctx.lineTo(W, y);
+      ctx.stroke();
+    }
+    // sparse dots
+    ctx.fillStyle = 'rgba(43,40,33,0.25)';
+    for (let i = 0; i < 12; i++) {
+      const x = (i * 113 + (groundScroll | 0)) % (W + 60) - 30;
+      ctx.beginPath();
+      ctx.arc(x, H - GROUND_H + 50 + (i % 3) * 10, 1.5, 0, Math.PI * 2);
+      ctx.fill();
+    }
+  }
+
+  function drawPipe(p) {
+    const topH = p.gapY;
+    const botY = p.gapY + p.gapH;
+    const botH = H - GROUND_H - botY;
+
+    // bamboo body
+    ctx.fillStyle = C.moss;
+    ctx.fillRect(p.x, 0, PIPE_W, topH);
+    ctx.fillRect(p.x, botY, PIPE_W, botH);
+
+    // edge stripes (shading)
+    ctx.fillStyle = 'rgba(43,40,33,0.22)';
+    ctx.fillRect(p.x, 0, 4, topH);
+    ctx.fillRect(p.x + PIPE_W - 4, 0, 4, topH);
+    ctx.fillRect(p.x, botY, 4, botH);
+    ctx.fillRect(p.x + PIPE_W - 4, botY, 4, botH);
+    ctx.fillStyle = 'rgba(245,239,226,0.10)';
+    ctx.fillRect(p.x + 8, 0, 4, topH);
+    ctx.fillRect(p.x + 8, botY, 4, botH);
+
+    // bamboo node rings
+    ctx.strokeStyle = C.mossDark;
+    ctx.lineWidth = 3;
+    const nodeSpacing = 56;
+    for (let y = nodeSpacing; y < topH - 22; y += nodeSpacing) {
+      ctx.beginPath();
+      ctx.moveTo(p.x, y);
+      ctx.lineTo(p.x + PIPE_W, y);
+      ctx.stroke();
+    }
+    for (let y = botY + 30 + nodeSpacing; y < H - GROUND_H; y += nodeSpacing) {
+      ctx.beginPath();
+      ctx.moveTo(p.x, y);
+      ctx.lineTo(p.x + PIPE_W, y);
+      ctx.stroke();
+    }
+
+    // caps — wider rim
+    const capH = 20;
+    ctx.fillStyle = C.moss;
+    ctx.fillRect(p.x - 7, topH - capH, PIPE_W + 14, capH);
+    ctx.fillRect(p.x - 7, botY, PIPE_W + 14, capH);
+    ctx.fillStyle = 'rgba(43,40,33,0.30)';
+    ctx.fillRect(p.x - 7, topH - capH, PIPE_W + 14, 4);
+    ctx.fillRect(p.x - 7, botY + capH - 4, PIPE_W + 14, 4);
+    ctx.fillStyle = 'rgba(245,239,226,0.12)';
+    ctx.fillRect(p.x - 7, topH - capH + 6, PIPE_W + 14, 3);
+  }
+
+  function drawCrane() {
+    const x = bird.x, y = bird.y;
+    ctx.save();
+    ctx.translate(x, y);
+    ctx.rotate(bird.rot);
+
+    // soft shadow
+    ctx.fillStyle = 'rgba(43,40,33,0.10)';
+    ctx.beginPath();
+    ctx.ellipse(2, 4, 24, 12, 0, 0, Math.PI * 2);
+    ctx.fill();
+
+    // body — white
+    ctx.fillStyle = C.white;
+    ctx.beginPath();
+    ctx.ellipse(0, 0, 22, 14, 0, 0, Math.PI * 2);
+    ctx.fill();
+
+    // tail — black tip
+    ctx.fillStyle = C.ink;
+    ctx.beginPath();
+    ctx.moveTo(-18, -3);
+    ctx.lineTo(-32, -7);
+    ctx.lineTo(-32, 7);
+    ctx.lineTo(-18, 3);
+    ctx.closePath();
+    ctx.fill();
+
+    // neck (white) extending to head
+    ctx.fillStyle = C.white;
+    ctx.beginPath();
+    ctx.moveTo(14, -3);
+    ctx.lineTo(32, -11);
+    ctx.lineTo(36, -7);
+    ctx.lineTo(20, 3);
+    ctx.closePath();
+    ctx.fill();
+
+    // head
+    ctx.beginPath();
+    ctx.arc(34, -11, 6.5, 0, Math.PI * 2);
+    ctx.fill();
+
+    // red crown
+    ctx.fillStyle = C.vermilion;
+    ctx.beginPath();
+    ctx.arc(35, -14, 4.5, 0, Math.PI * 2);
+    ctx.fill();
+
+    // beak
+    ctx.fillStyle = C.ink;
+    ctx.beginPath();
+    ctx.moveTo(39, -10);
+    ctx.lineTo(50, -9);
+    ctx.lineTo(39, -7);
+    ctx.closePath();
+    ctx.fill();
+
+    // eye
+    ctx.fillStyle = C.ink;
+    ctx.beginPath();
+    ctx.arc(34, -11, 1.4, 0, Math.PI * 2);
+    ctx.fill();
+
+    // wing — animated
+    const wingPhase = bird.wing;
+    const wingDip = Math.sin(wingPhase) * 8 - 2;
+    ctx.fillStyle = C.white;
+    ctx.beginPath();
+    ctx.ellipse(-2, wingDip, 17, 8, -0.18, 0, Math.PI * 2);
+    ctx.fill();
+    // black wing tip
+    ctx.fillStyle = C.ink;
+    ctx.beginPath();
+    ctx.ellipse(-14, wingDip + 3, 9, 4.5, -0.2, 0, Math.PI * 2);
+    ctx.fill();
+
+    ctx.restore();
+  }
+
+  // ── Loop ─────────────────────────────────────────────
+  let last = performance.now();
+  let groundScroll = 0;
+
+  function loop(now) {
+    const dt = Math.min((now - last) / 1000, 1/30);
+    last = now;
+
+    ctx.clearRect(0, 0, W, H);
+    drawBackground();
+
+    if (state === STATE.PLAYING) {
+      bird.vy += GRAVITY * dt;
+      if (bird.vy > MAX_FALL) bird.vy = MAX_FALL;
+      bird.y += bird.vy * dt;
+      bird.rot = Math.max(-0.45, Math.min(1.1, bird.vy / 720));
+      bird.wing += dt * 24;
+
+      pipeTimer += SCROLL * dt;
+      if (pipeTimer >= PIPE_SPACING) { pipeTimer = 0; spawnPipe(); }
+      for (const p of pipes) {
+        p.x -= SCROLL * dt;
+        if (!p.passed && p.x + PIPE_W < bird.x - bird.r) {
+          p.passed = true;
+          score++;
+          scoreEl.textContent = score;
+        }
+      }
+      pipes = pipes.filter(p => p.x + PIPE_W > -20);
+
+      groundScroll -= SCROLL * dt;
+
+      // collisions
+      if (bird.y + bird.r >= H - GROUND_H || bird.y - bird.r <= 0) {
+        bird.y = Math.min(bird.y, H - GROUND_H - bird.r);
+        gameOver();
+      } else {
+        for (const p of pipes) {
+          if (bird.x + bird.r > p.x && bird.x - bird.r < p.x + PIPE_W) {
+            if (bird.y - bird.r < p.gapY || bird.y + bird.r > p.gapY + p.gapH) {
+              gameOver();
+              break;
+            }
+          }
+        }
+      }
+    } else if (state === STATE.IDLE) {
+      bird.y = H * 0.42 + Math.sin(now / 280) * 10;
+      bird.wing += dt * 14;
+      bird.rot = Math.sin(now / 280) * 0.08;
+    } else if (state === STATE.OVER) {
+      bird.vy += GRAVITY * dt;
+      if (bird.vy > MAX_FALL) bird.vy = MAX_FALL;
+      bird.y += bird.vy * dt;
+      bird.rot = Math.min(1.5, bird.rot + dt * 3.2);
+      if (bird.y + bird.r > H - GROUND_H) {
+        bird.y = H - GROUND_H - bird.r;
+        bird.vy = 0;
+      }
+    }
+
+    for (const p of pipes) drawPipe(p);
+    drawGround();
+    drawCrane();
+
+    requestAnimationFrame(loop);
+  }
+
+  // start with a bird hovering
+  bird.x = W * 0.28;
+  bird.y = H * 0.42;
+  requestAnimationFrame(loop);
+})();
+</script>
+</body>
+</html>
