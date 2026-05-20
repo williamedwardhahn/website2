@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="description" content="William Edward Hahn, Ph.D. — Assistant Professor of Mathematics at Florida Atlantic University. Co-director of the Machine Perception and Cognitive Robotics Lab and the FAU AI Sandbox." />
+<title>William Edward Hahn, Ph.D.</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0b0d10;
+    --bg-elev: #12161b;
+    --fg: #e8ecf1;
+    --fg-dim: #9aa4b2;
+    --fg-mute: #5b6573;
+    --accent: #7cc4ff;
+    --accent-warm: #ffb670;
+    --line: #1e242c;
+    --max: 980px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    background: var(--bg);
+    color: var(--fg);
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    font-weight: 400;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
+  }
+  a {
+    color: var(--accent);
+    text-decoration: none;
+    border-bottom: 1px solid transparent;
+    transition: border-color .2s ease, color .2s ease;
+  }
+  a:hover { border-bottom-color: var(--accent); }
+  code, .mono { font-family: 'JetBrains Mono', ui-monospace, monospace; }
+
+  /* Background gradient noise */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background:
+      radial-gradient(1200px 600px at 15% -10%, rgba(124,196,255,0.08), transparent 60%),
+      radial-gradient(900px 500px at 110% 20%, rgba(255,182,112,0.06), transparent 60%);
+    z-index: -1;
+    pointer-events: none;
+  }
+
+  /* Nav */
+  nav {
+    position: sticky; top: 0; z-index: 10;
+    backdrop-filter: blur(12px);
+    background: rgba(11,13,16,0.7);
+    border-bottom: 1px solid var(--line);
+  }
+  nav .inner {
+    max-width: var(--max);
+    margin: 0 auto;
+    padding: 18px 32px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 14px;
+  }
+  nav .brand { font-family: 'Fraunces', serif; font-weight: 500; letter-spacing: -0.01em; }
+  nav .links { display: flex; gap: 28px; }
+  nav .links a {
+    color: var(--fg-dim);
+    border: none;
+  }
+  nav .links a:hover { color: var(--fg); border: none; }
+
+  main { max-width: var(--max); margin: 0 auto; padding: 0 32px; }
+
+  /* Hero */
+  .hero {
+    padding: 110px 0 80px;
+    border-bottom: 1px solid var(--line);
+  }
+  .hero .eyebrow {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    color: var(--accent);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-bottom: 24px;
+  }
+  .hero h1 {
+    font-family: 'Fraunces', serif;
+    font-weight: 500;
+    font-size: clamp(40px, 6vw, 64px);
+    line-height: 1.05;
+    letter-spacing: -0.02em;
+    margin-bottom: 24px;
+  }
+  .hero h1 .accent { color: var(--accent-warm); font-style: italic; font-weight: 400; }
+  .hero .lede {
+    font-size: clamp(17px, 1.8vw, 20px);
+    color: var(--fg-dim);
+    max-width: 660px;
+    margin-bottom: 36px;
+  }
+  .hero .meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 16px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    color: var(--fg-mute);
+  }
+  .hero .meta span { display: flex; align-items: center; gap: 8px; }
+  .hero .meta .dot { width: 4px; height: 4px; background: var(--fg-mute); border-radius: 50%; }
+
+  /* Sections */
+  section { padding: 80px 0; border-bottom: 1px solid var(--line); }
+  section:last-of-type { border-bottom: none; }
+  .section-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    color: var(--fg-mute);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    margin-bottom: 24px;
+  }
+  h2 {
+    font-family: 'Fraunces', serif;
+    font-weight: 500;
+    font-size: clamp(28px, 3.5vw, 36px);
+    letter-spacing: -0.015em;
+    margin-bottom: 32px;
+  }
+  p { margin-bottom: 18px; color: var(--fg-dim); max-width: 700px; }
+  p strong { color: var(--fg); font-weight: 500; }
+
+  /* Research grid */
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 16px;
+    margin-top: 36px;
+  }
+  .card {
+    background: var(--bg-elev);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 22px;
+    transition: transform .2s ease, border-color .2s ease;
+  }
+  .card:hover { transform: translateY(-2px); border-color: #2a323d; }
+  .card h3 {
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--fg);
+    margin-bottom: 8px;
+  }
+  .card p {
+    font-size: 13px;
+    color: var(--fg-mute);
+    margin: 0;
+    line-height: 1.5;
+  }
+
+  /* Labs */
+  .lab-row {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 24px;
+    margin-top: 12px;
+  }
+  @media (min-width: 720px) { .lab-row { grid-template-columns: 1fr 1fr; } }
+  .lab {
+    background: var(--bg-elev);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 28px;
+  }
+  .lab h3 {
+    font-family: 'Fraunces', serif;
+    font-weight: 500;
+    font-size: 22px;
+    margin-bottom: 10px;
+  }
+  .lab .lab-tag {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--accent);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 14px;
+  }
+  .lab p { font-size: 14px; margin-bottom: 16px; }
+  .lab a { font-size: 13px; font-family: 'JetBrains Mono', monospace; }
+
+  /* Publications */
+  .pubs { list-style: none; margin-top: 12px; }
+  .pubs li {
+    padding: 22px 0;
+    border-top: 1px solid var(--line);
+    display: grid;
+    grid-template-columns: 80px 1fr auto;
+    gap: 24px;
+    align-items: baseline;
+  }
+  .pubs li:last-child { border-bottom: 1px solid var(--line); }
+  .pubs .year {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    color: var(--fg-mute);
+  }
+  .pubs .title {
+    font-size: 15px;
+    color: var(--fg);
+    font-weight: 400;
+    line-height: 1.45;
+  }
+  .pubs .venue {
+    font-size: 13px;
+    color: var(--fg-mute);
+    margin-top: 4px;
+  }
+  .pubs .citations {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    color: var(--fg-mute);
+    white-space: nowrap;
+  }
+  @media (max-width: 600px) {
+    .pubs li { grid-template-columns: 1fr; gap: 6px; }
+    .pubs .citations { justify-self: start; }
+  }
+
+  /* Contact */
+  .contact-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 16px;
+    margin-top: 36px;
+  }
+  .contact-item {
+    padding: 20px;
+    background: var(--bg-elev);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+  }
+  .contact-item .label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--fg-mute);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 8px;
+  }
+  .contact-item a, .contact-item span {
+    font-size: 14px;
+    color: var(--fg);
+    word-break: break-word;
+  }
+
+  /* Footer */
+  footer {
+    padding: 40px 32px 60px;
+    text-align: center;
+    color: var(--fg-mute);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    border-top: 1px solid var(--line);
+  }
+
+  /* Subtle reveal */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .hero > * { animation: fadeUp .6s ease both; }
+  .hero h1 { animation-delay: .05s; }
+  .hero .lede { animation-delay: .15s; }
+  .hero .meta { animation-delay: .25s; }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="inner">
+    <div class="brand">W. E. Hahn</div>
+    <div class="links">
+      <a href="#about">About</a>
+      <a href="#research">Research</a>
+      <a href="#labs">Labs</a>
+      <a href="#publications">Publications</a>
+      <a href="#contact">Contact</a>
+    </div>
+  </div>
+</nav>
+
+<main>
+
+  <section class="hero">
+    <div class="eyebrow">Florida Atlantic University</div>
+    <h1>William Edward Hahn, <span class="accent">Ph.D.</span></h1>
+    <p class="lede">
+      Mathematician and machine learning researcher working at the intersection of
+      perception, computation, and robotics. Building systems that learn from sparse signal.
+    </p>
+    <div class="meta">
+      <span>Assistant Professor of Mathematics</span>
+      <span class="dot"></span>
+      <span>Co-director, MPCR Lab</span>
+      <span class="dot"></span>
+      <span>Co-director, FAU AI Sandbox</span>
+    </div>
+  </section>
+
+  <section id="about">
+    <div class="section-label">01 — About</div>
+    <h2>Background</h2>
+    <p>
+      I am an Assistant Professor in the Department of Mathematics and Statistics at
+      Florida Atlantic University. My research sits at the meeting point of <strong>compressed sensing</strong>,
+      <strong>sparse modeling</strong>, and <strong>deep learning</strong> — with applications spanning
+      computer vision, computational neuroscience, drug discovery, and autonomous systems.
+    </p>
+    <p>
+      I earned my B.S. in Physics and Mathematics from Guilford College in 2008, working on
+      neural networks and swarm optimization. I then studied artificial intelligence and
+      immune systems at the University of North Carolina at Greensboro before joining FAU's
+      Center for Complex Systems and Brain Sciences in 2011, where I completed my Ph.D. in 2016
+      on sparse coding and compressed sensing.
+    </p>
+    <p>
+      In 2014 I co-founded the Machine Perception and Cognitive Robotics Laboratory to build
+      a team of scientists, programmers, and engineers exploring novel hardware and software
+      environments for embodied intelligence.
+    </p>
+  </section>
+
+  <section id="research">
+    <div class="section-label">02 — Research</div>
+    <h2>Areas of work</h2>
+    <p>
+      Methods built on sparse representations and learned priors, applied to the messy,
+      high-dimensional signal that real perceptual and biological systems contend with.
+    </p>
+    <div class="grid">
+      <div class="card">
+        <h3>Compressed Sensing</h3>
+        <p>Reconstruction from undersampled signals; sparsity-driven inference.</p>
+      </div>
+      <div class="card">
+        <h3>Sparse Modeling</h3>
+        <p>Dictionary learning and sparse coding for natural and biological signals.</p>
+      </div>
+      <div class="card">
+        <h3>Deep Learning</h3>
+        <p>Transformer and CNN architectures for perception, prediction, and discovery.</p>
+      </div>
+      <div class="card">
+        <h3>Computer Vision</h3>
+        <p>Pattern recognition, feature extraction, classification at scale.</p>
+      </div>
+      <div class="card">
+        <h3>Computational Neuroscience</h3>
+        <p>Models of cortical computation and biologically-inspired learning.</p>
+      </div>
+      <div class="card">
+        <h3>Applied ML</h3>
+        <p>Drug discovery, telesurgery, substance-use surveillance, financial prediction.</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="labs">
+    <div class="section-label">03 — Affiliations</div>
+    <h2>Labs &amp; initiatives</h2>
+    <div class="lab-row">
+      <div class="lab">
+        <div class="lab-tag">Co-director · est. 2014</div>
+        <h3>MPCR Lab</h3>
+        <p>
+          The Machine Perception and Cognitive Robotics Laboratory at FAU — a multidisciplinary
+          group of scientists, engineers, and artists building hardware and software at the
+          intersection of perception, computation, and robotics.
+        </p>
+        <a href="https://www.mpcrlab.com/" target="_blank" rel="noopener">mpcrlab.com →</a>
+      </div>
+      <div class="lab">
+        <div class="lab-tag">Co-director</div>
+        <h3>FAU AI Sandbox</h3>
+        <p>
+          A campus hub for AI experimentation and education at Florida Atlantic University,
+          supporting research collaborations and access to compute, tooling, and applied ML.
+        </p>
+        <a href="https://www.fau.edu/science/directory/william-hahn/" target="_blank" rel="noopener">FAU profile →</a>
+      </div>
+    </div>
+  </section>
+
+  <section id="publications">
+    <div class="section-label">04 — Selected Publications</div>
+    <h2>Recent work</h2>
+    <p>
+      A selection of widely-cited papers across machine learning applications.
+      Full list on <a href="https://scholar.google.com/citations?user=eHyXKZAAAAAJ&hl=en" target="_blank" rel="noopener">Google Scholar</a>.
+    </p>
+    <ul class="pubs">
+      <li>
+        <span class="year">2022</span>
+        <div>
+          <div class="title">Predicting NEPSE index price using deep learning models</div>
+          <div class="venue">Multi-author — financial time series prediction</div>
+        </div>
+        <span class="citations">60 citations</span>
+      </li>
+      <li>
+        <span class="year">2021</span>
+        <div>
+          <div class="title">Using conditional GANs to reduce the effects of latency in robotic telesurgery</div>
+          <div class="venue">Generative models for real-time medical robotics</div>
+        </div>
+        <span class="citations">30 citations</span>
+      </li>
+      <li>
+        <span class="year">2021</span>
+        <div>
+          <div class="title">Online surveillance of novel psychoactive substances (NPS)</div>
+          <div class="venue">Machine learning for public-health monitoring</div>
+        </div>
+        <span class="citations">47 citations</span>
+      </li>
+      <li>
+        <span class="year">2020</span>
+        <div>
+          <div class="title">Predicting binding from screening assays with transformer network embeddings</div>
+          <div class="venue">Journal of Chemical Information and Modeling</div>
+        </div>
+        <span class="citations">49 citations</span>
+      </li>
+      <li>
+        <span class="year">2020</span>
+        <div>
+          <div class="title">Machine-learning approaches to substance-abuse research: emerging trends and implications</div>
+          <div class="venue">With E. Barenholtz, N. D. Fitzgerald</div>
+        </div>
+        <span class="citations">79 citations</span>
+      </li>
+    </ul>
+  </section>
+
+  <section id="contact">
+    <div class="section-label">05 — Contact</div>
+    <h2>Get in touch</h2>
+    <p>For collaborations, student inquiries, or speaking engagements.</p>
+    <div class="contact-grid">
+      <div class="contact-item">
+        <div class="label">Email</div>
+        <a href="mailto:whahn@fau.edu">whahn@fau.edu</a>
+      </div>
+      <div class="contact-item">
+        <div class="label">Office</div>
+        <span>Wimberly Library 103C<br>FAU, Boca Raton</span>
+      </div>
+      <div class="contact-item">
+        <div class="label">Phone</div>
+        <a href="tel:+15612973340">561-297-3340</a>
+      </div>
+      <div class="contact-item">
+        <div class="label">Scholar</div>
+        <a href="https://scholar.google.com/citations?user=eHyXKZAAAAAJ&hl=en" target="_blank" rel="noopener">Google Scholar</a>
+      </div>
+      <div class="contact-item">
+        <div class="label">Twitter / X</div>
+        <a href="https://x.com/will_hahn" target="_blank" rel="noopener">@will_hahn</a>
+      </div>
+      <div class="contact-item">
+        <div class="label">LinkedIn</div>
+        <a href="https://www.linkedin.com/in/william-edward-hahn-532654124/" target="_blank" rel="noopener">william-edward-hahn</a>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  © <span id="year"></span> William Edward Hahn · Built with Claude Code
+</footer>
+
+<script>
+  document.getElementById('year').textContent = new Date().getFullYear();
+</script>
+
+</body>
+</html>
